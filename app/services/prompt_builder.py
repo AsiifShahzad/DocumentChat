@@ -5,27 +5,22 @@ def build_prompt(chunks: List[dict], question: str) -> str:
 
     context_parts = []
 
-    for chunk in chunks:
+    for i, chunk in enumerate(chunks):
         text = chunk.get("text", "")
         source = chunk.get("source", "unknown")
         page = chunk.get("page")
-
-        citation = f"(Source: {source}, Page: {page})"
-
-        context_parts.append(f"{text}\n{citation}")
+        context_parts.append(f"[Chunk {i+1} | Source: {source}, Page: {page}]\n{text}")
 
     context = "\n\n".join(context_parts)
 
-    prompt = f"""
-Answer the question using the context below.
+    prompt = f"""You are a helpful assistant. Answer the user's question using ONLY the context provided below.
+If the answer is not found in the context, say "I couldn't find relevant information in the document."
 
-Context:
+CONTEXT:
 {context}
 
-Question:
-{question}
+QUESTION: {question}
 
-Answer with sources.
-"""
+ANSWER:"""
 
     return prompt

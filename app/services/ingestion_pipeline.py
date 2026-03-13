@@ -5,6 +5,7 @@ from app.services.vector_store import insert_embeddings
 
 from typing import List, Tuple
 from langchain_core.documents import Document
+from pathlib import Path
 
 
 def data_ingestion(file_path: str, session_id: str) -> Tuple[List[Document], List[List[float]]]:
@@ -12,11 +13,15 @@ def data_ingestion(file_path: str, session_id: str) -> Tuple[List[Document], Lis
     chunks = split_documents(documents)
     embeddings = document_embedding(chunks)
 
+    # Extract just the filename, not the full path
+    filename = Path(file_path).name
+
     metadata = [
         {
             "text": doc.page_content,
-            "source": doc.metadata.get("source"),
-            "page": doc.metadata.get("page")
+            "source": filename, 
+            "page": doc.metadata.get("page", 0), 
+            "session_id": session_id  
         }
         for doc in chunks
     ]

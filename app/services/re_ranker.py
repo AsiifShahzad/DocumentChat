@@ -11,12 +11,7 @@ def get_reranker():
     return _reranker
 
 def rerank_chunks(query: str, chunks: List[Dict], top_k: int = 5) -> List[Dict]:
-    """
-    Rerank chunks by relevance to query.
-    
-    IMPORTANT: If reranking scores collapse (avg < 0.1), falls back to vector search scores
-    because the reranker model may not understand the query semantics.
-    """
+
     reranker = get_reranker()
     pairs = [(query, chunk["text"]) for chunk in chunks]
     scores = reranker.predict(pairs)
@@ -26,6 +21,9 @@ def rerank_chunks(query: str, chunks: List[Dict], top_k: int = 5) -> List[Dict]:
     
     avg_rerank_score = np.mean([c["rerank_score"] for c in chunks])
     
+    """ If reranking scores collapse (avg < 0.1), falls back to vector search scores
+    because the reranker model may not understand the query semantics.
+    """
     if avg_rerank_score < 0.1:
         sorted_chunks = sorted(chunks, key=lambda x: x.get("vector_score", 0), reverse=True)
         for chunk in sorted_chunks:
